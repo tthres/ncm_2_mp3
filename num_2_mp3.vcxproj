@@ -18,6 +18,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="thirdparty\aes.c" />
+    <ClCompile Include="thirdparty\cJSON.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="thirdparty\aes.h" />
+    <ClInclude Include="thirdparty\cJSON.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -126,14 +135,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\others\ncmToMp3\aes.c" />
-    <ClCompile Include="..\..\others\ncmToMp3\cJSON.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\others\ncmToMp3\aes.h" />
-    <ClInclude Include="..\..\others\ncmToMp3\cJSON.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

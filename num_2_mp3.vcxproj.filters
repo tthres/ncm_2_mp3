@@ -13,21 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{9d25ea64-3ecf-40fc-b34f-1eb8512ae598}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\others\ncmToMp3\aes.c">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\others\ncmToMp3\cJSON.c">
-      <Filter>源文件</Filter>
+    <ClCompile Include="thirdparty\aes.c">
+      <Filter>thirdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\cJSON.c">
+      <Filter>thirdparty</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\others\ncmToMp3\aes.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="thirdparty\aes.h">
+      <Filter>thirdparty</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\others\ncmToMp3\cJSON.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="thirdparty\cJSON.h">
+      <Filter>thirdparty</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
