@@ -27,6 +27,9 @@
     <ClCompile Include="thirdparty\cJSON.c">
       <Filter>thirdparty</Filter>
     </ClCompile>
+    <ClCompile Include="MusicFile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="thirdparty\aes.h">
@@ -34,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="thirdparty\cJSON.h">
       <Filter>thirdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="MusicFile.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

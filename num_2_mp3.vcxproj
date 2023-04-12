@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MusicFile.cpp" />
     <ClCompile Include="thirdparty\aes.c" />
     <ClCompile Include="thirdparty\cJSON.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MusicFile.h" />
     <ClInclude Include="thirdparty\aes.h" />
     <ClInclude Include="thirdparty\cJSON.h" />
   </ItemGroup>
