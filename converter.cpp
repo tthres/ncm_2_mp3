@@ -8,19 +8,11 @@ Converter::Converter()
 
 }
 
+
+
 void Converter::ncmDecode_t(const QString &filename)
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qInfo() << "No such file:" << filename;
-        return;
-    }
 
-    QDataStream stream(&file);
-    stream.skipRawData(10);     // 从当前位置移动10个字节
-
-    unsigned char buf[16];
-    int len=0;
 }
 
 void Converter::ncmDecode(std::list<QString> &filelist)

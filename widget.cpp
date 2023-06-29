@@ -76,9 +76,25 @@ void Widget::on_startButton_clicked()
     for (auto it = _list.begin(); it != _list.end(); it++) {
         count++;
     }
-    qInfo() << "共找到ncm文件[" << count << "]个";
+    qInfo() << "共找到NCM文件[" << count << "]个";
 
     // 开始转换
+    for (auto it = _list.begin(); it != _list.end(); it++) {
+
+        QString qstr = QString(it->data());
+        QByteArray byteArray = qstr.toLocal8Bit();
+        const char *cstr = byteArray.constData();
+
+//        QString qstr = QString(it->data());
+//        std::string str = qstr.toStdString();
+//        const char *cstr = str.c_str();
+        qInfo() << "transform" << cstr << "....";
+        int ret = readFileData(cstr);
+        if (ret != 0) {
+            qInfo() << "error?? ret = " << ret;
+        }
+        qInfo() << "transform" << cstr << "succeed !!";
+    }
 
     // 保存文件
 }

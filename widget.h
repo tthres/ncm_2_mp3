@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include "converter.h"
+#include "model.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }

@@ -6,8 +6,6 @@
 #include <QFile>
 #include <QByteArray>
 #include <QDataStream>
-#include "aes.h"
-#include "cJSON.h"
 
 class Converter
 {
@@ -19,6 +17,8 @@ public:
 private:
 
     void ncmDecode_t(const QString &filename);
+
+    unsigned char* base64_decode(unsigned char* code, int len, int* actLen);
 
     const std::array<unsigned char, 16> meta_key;
     const std::array<unsigned char, 16> core_key;

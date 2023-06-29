@@ -13,12 +13,14 @@ SOURCES += \
     cJSON.c \
     converter.cpp \
     main.cpp \
+    model.c \
     widget.cpp
 
 HEADERS += \
     aes.h \
     cJSON.h \
     converter.h \
+    model.h \
     widget.h
 
 FORMS += \
