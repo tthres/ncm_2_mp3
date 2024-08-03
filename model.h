@@ -8,7 +8,6 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <libgen.h>
 
 #include "aes.h"
 #include "cJSON.h"
