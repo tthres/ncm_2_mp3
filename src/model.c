@@ -223,8 +223,25 @@ int readFileData(const char* fileName)
 	cJSON* sub = cJSON_GetObjectItem(cjson, "artist");
 	char*artist=cJSON_GetArrayItem(cJSON_GetArrayItem(sub, 0),0)->valuestring;
 	char* format = cJSON_GetObjectItem(cjson, "format")->valuestring;
+
+#ifdef _WIN32
+    // 获取输入文件的目录路径
+    char drive[_MAX_DRIVE];
+    char dir[_MAX_DIR];
+    char fname[_MAX_FNAME];
+    char ext[_MAX_EXT];
+    _splitpath(fileName, drive, dir, fname, ext);
+
+    char dirPath[_MAX_PATH];
+    _makepath(dirPath, drive, dir, NULL, NULL);
+
+	// 分配足够的内存来存储完整的文件路径
+    char saveFileName[_MAX_PATH];
+    _snprintf(saveFileName, sizeof(saveFileName), "%s%s - %s.%s", dirPath, artist, musicName, format);
+#else
 	char* saveFileName =(char*)malloc(strlen(musicName) + strlen(artist) + strlen(format)+5);
 	sprintf(saveFileName, "%s - %s.%s", artist, musicName, format);
+#endif 
 	FILE* fo=fopen(saveFileName, "wb");
 	if (fo == NULL)
 	{

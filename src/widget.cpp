@@ -33,8 +33,10 @@ std::list<QString> Widget::getNcmFiles(const QString &foldername)
 
     QFileInfoList fileInfoList = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
 
-    for (const QFileInfo& fileInfo : fileInfoList) {
-            if (fileInfo.isFile()) { // 如果是文件
+    for (const QFileInfo& fileInfo : fileInfoList) 
+    {
+            if (fileInfo.isFile()) // 如果是文件
+            { 
                 QString extension = fileInfo.suffix(); // 获取文件扩展名
                 if (extension == "ncm") { // 如果扩展名是 ".ncm"
                     retList.push_back(fileInfo.absoluteFilePath());
@@ -81,19 +83,21 @@ void Widget::on_startButton_clicked()
     // 开始转换
     for (auto it = _list.begin(); it != _list.end(); it++) {
 
-        QString qstr = QString(it->data());
-        QByteArray byteArray = qstr.toLocal8Bit();
-        const char *cstr = byteArray.constData();
-
-//        QString qstr = QString(it->data());
-//        std::string str = qstr.toStdString();
-//        const char *cstr = str.c_str();
-        qInfo() << "transform" << cstr << "....";
+        
+         QString qstr = *it;
+         qInfo() << "transform" << *it << "....";
+         QByteArray  byteArray = it->toLocal8Bit();
+         const char *cstr = byteArray.constData();
+         qInfo().noquote() << "transform" << it->toUtf8().constData() << "....";
+         
         int ret = readFileData(cstr);
         if (ret != 0) {
             qInfo() << "error?? ret = " << ret;
         }
-        qInfo() << "transform" << cstr << "succeed !!";
+        else
+        {
+            qInfo() << "transform" << cstr << "succeed !!";
+        }
     }
 
     // 保存文件
