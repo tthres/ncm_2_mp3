@@ -88,31 +88,37 @@ unsigned char* base64_decode(unsigned char* code, int len, int* actLen)
 			 36,37,38,39,40,41,42,43,44,
 			 45,46,47,48,49,50,51
 	};
-	long str_len;
-	unsigned char* res;
-	int i, j;
+    int padding = 0;
+    if (len > 0 && code[len - 1] == '=')
+        padding++;
+    if (len > 1 && code[len - 2] == '=')
+        padding++;
 
-	//计算解码后的字符串长度  
-	//判断编码后的字符串后是否有=
-	if (strstr(code, "=="))
-		str_len = len / 4 * 3 - 2;
-	else if (strstr(code, "="))
-		str_len = len / 4 * 3 - 1;
-	else
-		str_len = len / 4 * 3;
+    *actLen            = (len / 4) * 3 - padding;
+    unsigned char* res = (unsigned char*) malloc(*actLen + 1);
+    if (!res)
+        return NULL;
 
-	*actLen = str_len;
-	res = malloc(sizeof(unsigned char) * str_len + 1);
-	res[str_len] = '\0';
+    int i, j;
+    for (i = 0, j = 0; i < len - padding;)
+    {
+        uint32_t sextet_a = table[code[i++]];
+        uint32_t sextet_b = table[code[i++]];
+        uint32_t sextet_c = (i < len) ? table[code[i++]] : 64;
+        uint32_t sextet_d = (i < len) ? table[code[i++]] : 64;
 
-	//以4个字符为一位进行解码  
-	for (i = 0, j = 0; i < len - 2; j += 3, i += 4)
-	{
-		res[j] = ((unsigned char)table[code[i]]) << 2 | (((unsigned char)table[code[i + 1]]) >> 4); 
-		res[j + 1] = (((unsigned char)table[code[i + 1]]) << 4) | (((unsigned char)table[code[i + 2]]) >> 2);  
-		res[j + 2] = (((unsigned char)table[code[i + 2]]) << 6) | ((unsigned char)table[code[i + 3]]); 
-	}
-	return res;
+        uint32_t triple = (sextet_a << 18) + (sextet_b << 12) + (sextet_c << 6) + sextet_d;
+
+        if (j < *actLen)
+            res[j++] = (triple >> 16) & 0xFF;
+        if (j < *actLen)
+            res[j++] = (triple >> 8) & 0xFF;
+        if (j < *actLen)
+            res[j++] = triple & 0xFF;
+    }
+
+    res[*actLen] = '\0';
+    return res;
 
 }
 

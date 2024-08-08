@@ -8,10 +8,14 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QDebug>
+#include <QProgressDialog>
 #include "model.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
+namespace Ui
+{
+class Widget;
+}
 QT_END_NAMESPACE
 
 class Widget : public QWidget
@@ -34,8 +38,9 @@ private slots:
 private:
     std::list<QString> getNcmFiles(const QString &foldername);
 
-    Ui::Widget *ui;
-    QString folderName;
+    Ui::Widget        *ui;
+    QString            folderName;
     std::list<QString> _list;
+    QProgressDialog   *_progressDialog;
 };
 #endif // WIDGET_H
