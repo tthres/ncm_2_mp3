@@ -86,24 +86,15 @@ jobs:
     - name: Create Installer
       shell: pwsh
       run: |
-        $scriptPath = ".\${{ env.NSIS_SCRIPT_NAME }}"
-        if (Test-Path $scriptPath) {
-          $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
-          if (Test-Path $nsisPath) {
-            Write-Output "Running NSIS with command: $nsisPath /V4 /DBUILD_TYPE=${{ env.BUILD_TYPE }} $scriptPath"
-            & $nsisPath /V4 /DBUILD_TYPE=${{ env.BUILD_TYPE }} $scriptPath
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "makensis failed with exit code $LASTEXITCODE"
-              exit 1
-            }
-          } else {
-            Write-Error "NSIS executable not found at $nsisPath"
-            exit 1
-          }
-        } else {
-          Write-Error "NSIS script not found at $scriptPath"
+        $buildDir = "${{github.workspace}}/build/Release"
+        Copy-Item "install.nsi" -Destination $buildDir
+        Set-Location $buildDir
+        & 'C:\Program Files (x86)\NSIS\makensis.exe' /V4 install.nsi
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "makensis failed with exit code $LASTEXITCODE"
           exit 1
         }
+        Move-Item ncm2mp3-setup.exe -Destination ${{github.workspace}}
 
     - name: Check Installer
       shell: pwsh
