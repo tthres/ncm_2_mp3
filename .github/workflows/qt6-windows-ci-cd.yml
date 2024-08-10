@@ -12,6 +12,7 @@ env:
   BUILD_TYPE: Release
   QT_VERSION: 6.7.2
   ARTIFACT_NAME: ncm2mp3-setup
+  NSIS_SCRIPT_NAME: install.nsi
 
 jobs:
   build-and-release:
@@ -69,10 +70,27 @@ jobs:
     - name: Install NSIS
       uses: joncloud/makensis-action@v3.7
 
+    - name: Debug - List Files
+      shell: pwsh
+      run: |
+        Write-Output "Listing files in the current directory:"
+        Get-ChildItem -Recurse | Select-Object FullName
+
+    - name: Rename NSIS Script
+      shell: pwsh
+      run: |
+        if (Test-Path ".\installer.nsi") {
+          Rename-Item -Path ".\installer.nsi" -NewName ${{ env.NSIS_SCRIPT_NAME }}
+          Write-Output "Renamed installer.nsi to ${{ env.NSIS_SCRIPT_NAME }}"
+        } else {
+          Write-Error "installer.nsi not found"
+          exit 1
+        }
+
     - name: Check NSIS script
       shell: pwsh
       run: |
-        $scriptPath = ".\installer.nsi"
+        $scriptPath = ".\${{ env.NSIS_SCRIPT_NAME }}"
         if (Test-Path $scriptPath) {
           Write-Output "NSIS script found at $scriptPath"
           Get-Content $scriptPath
@@ -85,11 +103,18 @@ jobs:
     - name: Create Installer
       shell: pwsh
       run: |
-        $scriptPath = ".\installer.nsi"
+        $scriptPath = ".\${{ env.NSIS_SCRIPT_NAME }}"
         if (Test-Path $scriptPath) {
-          & 'C:\Program Files (x86)\NSIS\makensis.exe' /V4 $scriptPath
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "makensis failed with exit code $LASTEXITCODE"
+          $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
+          if (Test-Path $nsisPath) {
+            Write-Output "Running NSIS with command: $nsisPath /V4 /DBUILD_TYPE=${{ env.BUILD_TYPE }} $scriptPath"
+            & $nsisPath /V4 /DBUILD_TYPE=${{ env.BUILD_TYPE }} $scriptPath
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "makensis failed with exit code $LASTEXITCODE"
+              exit 1
+            }
+          } else {
+            Write-Error "NSIS executable not found at $nsisPath"
             exit 1
           }
         } else {
