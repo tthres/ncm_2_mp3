@@ -70,44 +70,34 @@ jobs:
     - name: Install NSIS
       uses: joncloud/makensis-action@v3.7
 
-    - name: Prepare for NSIS
+    - name: Debug Info
+      shell: pwsh
+      run: |
+        Write-Output "Current directory: $PWD"
+        Write-Output "GitHub workspace: ${{github.workspace}}"
+        Write-Output "Content of current directory:"
+        Get-ChildItem -Recurse
+        Write-Output "Content of build directory:"
+        Get-ChildItem -Path "${{github.workspace}}/build" -Recurse
+
+    - name: Prepare NSIS Script
       shell: pwsh
       run: |
         $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
-        Copy-Item "${{github.workspace}}/${{ env.NSIS_SCRIPT_NAME }}" -Destination $buildDir
-        Write-Output "Contents of build directory:"
-        Get-ChildItem -Path $buildDir -Recurse
+        $content = Get-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
+        $content = $content -replace 'File "ncm2mp3.exe"', 'File "${{github.workspace}}\build\${{env.BUILD_TYPE}}\ncm2mp3.exe"'
+        $content | Set-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
+        Write-Output "Updated NSIS script content:"
+        Get-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
 
     - name: Create Installer
       shell: pwsh
       run: |
-        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
-        Set-Location $buildDir
-        Write-Output "Current directory: $buildDir"
-        Write-Output "Current directory contents:"
-        Get-ChildItem -Recurse
-        
-        # 检查 ncm2mp3.exe 是否存在
-        if (Test-Path "ncm2mp3.exe") {
-            Write-Output "ncm2mp3.exe found in current directory"
-        } else {
-            Write-Error "ncm2mp3.exe not found in current directory"
-            exit 1
-        }
-        
         $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
-        Write-Output "Running NSIS with command: $nsisPath /V3 ${{ env.NSIS_SCRIPT_NAME }}"
-        & $nsisPath /V3 ${{ env.NSIS_SCRIPT_NAME }}
+        Write-Output "Running NSIS with command: $nsisPath /V4 ${{ env.NSIS_SCRIPT_NAME }}"
+        & $nsisPath /V4 ${{ env.NSIS_SCRIPT_NAME }}
         if ($LASTEXITCODE -ne 0) {
           Write-Error "makensis failed with exit code $LASTEXITCODE"
-          exit 1
-        }
-        
-        if (Test-Path "${{ env.ARTIFACT_NAME }}.exe") {
-          Move-Item "${{ env.ARTIFACT_NAME }}.exe" -Destination ${{github.workspace}}
-          Write-Output "Installer created and moved to workspace"
-        } else {
-          Write-Error "Installer not created"
           exit 1
         }
 
