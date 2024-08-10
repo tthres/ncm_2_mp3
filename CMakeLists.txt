@@ -49,11 +49,15 @@ set(PROJECT_SOURCES
     src/model/file_model.h
 )
 
+set(RESOURCE_FILES
+    resources/resources.qrc
+)
 
 qt_add_executable(ncm2mp3
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
     ${UI_HEADERS}
+    ${RESOURCE_FILES}
 )
 
 target_link_libraries(ncm2mp3 PRIVATE 

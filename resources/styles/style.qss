@@ -1,0 +1,87 @@
+/* 全局样式 */
+QWidget {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+/* 标签样式 */
+QLabel {
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 按钮样式 */
+QPushButton {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #2980b9;
+}
+
+QPushButton:pressed {
+    background-color: #21618c;
+}
+
+/* 特定按钮样式 */
+#openButton {
+    background-color: #2ecc71;
+}
+
+#openButton:hover {
+    background-color: #27ae60;
+}
+
+#startButton {
+    background-color: #e74c3c;
+}
+
+#startButton:hover {
+    background-color: #c0392b;
+}
+
+#stoplButton,
+#cancelButton {
+    background-color: #95a5a6;
+}
+
+#stoplButton:hover,
+#cancelButton:hover {
+    background-color: #7f8c8d;
+}
+
+/* 输入框样式 */
+QLineEdit {
+    border: 2px solid #bdc3c7;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: white;
+    color: #34495e;
+    font-size: 12px;
+}
+
+QLineEdit:read-only {
+    background-color: #ecf0f1;
+}
+
+/* 列表视图样式 */
+QListView {
+    border: 2px solid #bdc3c7;
+    border-radius: 5px;
+    background-color: white;
+}
+
+QListView::item {
+    padding: 5px;
+}
+
+QListView::item:selected {
+    background-color: #3498db;
+    color: white;
+}
