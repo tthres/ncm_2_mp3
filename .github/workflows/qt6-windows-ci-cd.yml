@@ -119,8 +119,12 @@ jobs:
 
     - name: Generate release tag
       id: tag
+      shell: pwsh
       run: |
-        echo "release_tag=UserBuild_$(date +'%Y.%m.%d_%H-%M')" >> $GITHUB_OUTPUT
+        $timestamp = Get-Date -Format "yyyy.MM.dd_HH-mm"
+        $releaseTag = "UserBuild_$timestamp"
+        echo "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
+        echo "Generated release tag: $releaseTag"
 
     - name: Create Release
       id: create_release
