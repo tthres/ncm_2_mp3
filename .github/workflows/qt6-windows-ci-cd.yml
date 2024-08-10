@@ -1,4 +1,4 @@
-name: Qt 6 Windows CI/CD (Optimized)
+name: Qt 6 Windows CI/CD (Path Fix)
 
 on:
   push:
@@ -11,15 +11,12 @@ on:
 env:
   BUILD_TYPE: Release
   QT_VERSION: 6.7.2
-  ARTIFACT_NAME: ncm2mp3-setup
-  NSIS_SCRIPT_NAME: install.nsi
+  ARTIFACT_NAME: ncm_2_mp3-windows-x64
 
 jobs:
-  build-and-release:
-    name: Build and Release on Windows
+  build:
+    name: Build on Windows
     runs-on: windows-2019
-    permissions:
-      contents: write
 
     steps:
     - uses: actions/checkout@v2
@@ -52,6 +49,7 @@ jobs:
       run: |
         Write-Output "Qt6_DIR: $env:Qt6_DIR"
         
+        # 查找 windeployqt.exe
         $windeployqtPath = Get-ChildItem -Path $env:Qt6_DIR -Recurse -Filter "windeployqt.exe" | Select-Object -First 1 -ExpandProperty FullName
         
         if ($windeployqtPath) {
@@ -66,50 +64,16 @@ jobs:
           Get-ChildItem -Path $env:Qt6_DIR -Recurse | Where-Object { $_.Name -like "*deploy*" } | ForEach-Object { Write-Output $_.FullName }
           exit 1
         }
-
-        - name: Install NSIS
-        uses: joncloud/makensis-action@v3.7
-  
-    - name: Debug Info
-      shell: pwsh
-      run: |
-        Write-Output "Current directory: $PWD"
-        Write-Output "GitHub workspace: ${{github.workspace}}"
-        Write-Output "Content of build directory:"
-        Get-ChildItem -Path "${{github.workspace}}/build/${{env.BUILD_TYPE}}" -Recurse
-
-    - name: Create Installer
-      shell: pwsh
-      run: |
-        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
-        $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
-        Write-Output "Running NSIS with command: $nsisPath /V4 /DBUILD_DIR=$buildDir ${{ env.NSIS_SCRIPT_NAME }}"
-        & $nsisPath /V4 /DBUILD_DIR="$buildDir" ${{ env.NSIS_SCRIPT_NAME }}
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "makensis failed with exit code $LASTEXITCODE"
-          exit 1
-        }
-
-    - name: Check Installer
-      shell: pwsh
-      run: |
-        $installerPath = "${{ env.ARTIFACT_NAME }}.exe"
-        if (Test-Path $installerPath) {
-          Write-Output "Installer created successfully at $installerPath"
-        } else {
-          Write-Error "Installer not found at $installerPath"
-          Get-ChildItem -Recurse
-          exit 1
-        }
+        
+        Write-Output "Listing current directory contents:"
+        Get-ChildItem -Recurse
+        
+        7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
 
     - name: Generate release tag
       id: tag
-      shell: pwsh
       run: |
-        $timestamp = Get-Date -Format "yyyy.MM.dd_HH-mm"
-        $releaseTag = "UserBuild_$timestamp"
-        echo "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
-        echo "Generated release tag: $releaseTag"
+        echo "::set-output name=release_tag::UserBuild_$(date +'%Y.%m.%d_%H-%M')"
 
     - name: Create Release
       id: create_release
@@ -128,6 +92,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./ncm2mp3-setup.exe
-        asset_name: ncm2mp3-setup.exe
-        asset_content_type: application/vnd.microsoft.portable-executable
+        asset_path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}/${{env.ARTIFACT_NAME}}.zip
+        asset_name: ${{env.ARTIFACT_NAME}}.zip
+        asset_content_type: application/zip
