@@ -67,35 +67,24 @@ jobs:
           exit 1
         }
 
-    - name: Install NSIS
-      uses: joncloud/makensis-action@v3.7
-
+        - name: Install NSIS
+        uses: joncloud/makensis-action@v3.7
+  
     - name: Debug Info
       shell: pwsh
       run: |
         Write-Output "Current directory: $PWD"
         Write-Output "GitHub workspace: ${{github.workspace}}"
-        Write-Output "Content of current directory:"
-        Get-ChildItem -Recurse
         Write-Output "Content of build directory:"
-        Get-ChildItem -Path "${{github.workspace}}/build" -Recurse
-
-    - name: Prepare NSIS Script
-      shell: pwsh
-      run: |
-        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
-        $content = Get-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
-        $content = $content -replace 'File "ncm2mp3.exe"', 'File "${{github.workspace}}\build\${{env.BUILD_TYPE}}\ncm2mp3.exe"'
-        $content | Set-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
-        Write-Output "Updated NSIS script content:"
-        Get-Content -Path ${{ env.NSIS_SCRIPT_NAME }}
+        Get-ChildItem -Path "${{github.workspace}}/build/${{env.BUILD_TYPE}}" -Recurse
 
     - name: Create Installer
       shell: pwsh
       run: |
+        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
         $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
-        Write-Output "Running NSIS with command: $nsisPath /V4 ${{ env.NSIS_SCRIPT_NAME }}"
-        & $nsisPath /V4 ${{ env.NSIS_SCRIPT_NAME }}
+        Write-Output "Running NSIS with command: $nsisPath /V4 /DBUILD_DIR=$buildDir ${{ env.NSIS_SCRIPT_NAME }}"
+        & $nsisPath /V4 /DBUILD_DIR="$buildDir" ${{ env.NSIS_SCRIPT_NAME }}
         if ($LASTEXITCODE -ne 0) {
           Write-Error "makensis failed with exit code $LASTEXITCODE"
           exit 1
@@ -104,7 +93,7 @@ jobs:
     - name: Check Installer
       shell: pwsh
       run: |
-        $installerPath = ".\ncm2mp3-setup.exe"
+        $installerPath = "${{ env.ARTIFACT_NAME }}.exe"
         if (Test-Path $installerPath) {
           Write-Output "Installer created successfully at $installerPath"
         } else {

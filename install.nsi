@@ -38,22 +38,22 @@ Section "ncm2mp3" SecDummy
   SetOutPath "$INSTDIR"
   
   ; 复制主程序和依赖项
-  File "ncm2mp3.exe"
-  File "Qt6Core.dll"
-  File "Qt6Gui.dll"
-  File "Qt6Widgets.dll"
-  File "Qt6Concurrent.dll"
+  File "${BUILD_DIR}\ncm2mp3.exe"
+  File "${BUILD_DIR}\Qt6Core.dll"
+  File "${BUILD_DIR}\Qt6Gui.dll"
+  File "${BUILD_DIR}\Qt6Widgets.dll"
+  File "${BUILD_DIR}\Qt6Concurrent.dll"
   
   ; 复制 Qt 插件
   SetOutPath "$INSTDIR\plugins\platforms"
-  File "plugins\platforms\qwindows.dll"
+  File "${BUILD_DIR}\plugins\platforms\qwindows.dll"
   
   SetOutPath "$INSTDIR\plugins\styles"
-  File "plugins\styles\qwindowsvistastyle.dll"
+  File "${BUILD_DIR}\plugins\styles\qwindowsvistastyle.dll"
   
   ; 复制其他必要的 DLL
   SetOutPath "$INSTDIR"
-  File "*.dll"
+  File "${BUILD_DIR}\*.dll"
   
   ; 创建开始菜单快捷方式
   CreateDirectory "$SMPROGRAMS\ncm2mp3"
