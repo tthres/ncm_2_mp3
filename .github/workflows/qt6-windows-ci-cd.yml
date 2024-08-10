@@ -70,29 +70,28 @@ jobs:
         
         7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{env.ARTIFACT_NAME}}
-        path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}/${{env.ARTIFACT_NAME}}.zip
+    - name: Generate release tag
+      id: tag
+      run: |
+        echo "::set-output name=release_tag::UserBuild_$(date +'%Y.%m.%d_%H-%M')"
 
-  release:
-    name: Create Release
-    needs: build
-    if: github.event_name == 'release' && github.event.action == 'created'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download Artifact
-      uses: actions/download-artifact@v2
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: ${{env.ARTIFACT_NAME}}
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        release_name: Release ${{ steps.tag.outputs.release_tag }}
+        draft: false
+        prerelease: false
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./${{env.ARTIFACT_NAME}}.zip
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}/${{env.ARTIFACT_NAME}}.zip
         asset_name: ${{env.ARTIFACT_NAME}}.zip
         asset_content_type: application/zip
