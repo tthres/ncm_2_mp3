@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#pragma comment(linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"")
+#endif
+
 #include "widget.h"
 
 #include <QApplication>

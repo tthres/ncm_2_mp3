@@ -11,7 +11,7 @@ on:
 env:
   BUILD_TYPE: Release
   QT_VERSION: 6.7.2
-  ARTIFACT_NAME: YourProjectName-windows
+  ARTIFACT_NAME: ncm_2_mp3-windows-x64
 
 jobs:
   build:
