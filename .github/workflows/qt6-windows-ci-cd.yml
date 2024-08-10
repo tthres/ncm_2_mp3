@@ -11,12 +11,14 @@ on:
 env:
   BUILD_TYPE: Release
   QT_VERSION: 6.7.2
-  ARTIFACT_NAME: ncm_2_mp3-windows-x64
+  ARTIFACT_NAME: ncm2mp3-setup
 
 jobs:
-  build:
-    name: Build on Windows
+  build-and-release:
+    name: Build and Release on Windows
     runs-on: windows-2019
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v2
@@ -49,7 +51,6 @@ jobs:
       run: |
         Write-Output "Qt6_DIR: $env:Qt6_DIR"
         
-        # 查找 windeployqt.exe
         $windeployqtPath = Get-ChildItem -Path $env:Qt6_DIR -Recurse -Filter "windeployqt.exe" | Select-Object -First 1 -ExpandProperty FullName
         
         if ($windeployqtPath) {
@@ -64,16 +65,18 @@ jobs:
           Get-ChildItem -Path $env:Qt6_DIR -Recurse | Where-Object { $_.Name -like "*deploy*" } | ForEach-Object { Write-Output $_.FullName }
           exit 1
         }
-        
-        Write-Output "Listing current directory contents:"
-        Get-ChildItem -Recurse
-        
-        7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
+
+    - name: Install NSIS
+      uses: joncloud/makensis-action@v3.7
+
+    - name: Create Installer
+      run: |
+        makensis.exe installer.nsi
 
     - name: Generate release tag
       id: tag
       run: |
-        echo "::set-output name=release_tag::UserBuild_$(date +'%Y.%m.%d_%H-%M')"
+        echo "release_tag=UserBuild_$(date +'%Y.%m.%d_%H-%M')" >> $GITHUB_OUTPUT
 
     - name: Create Release
       id: create_release
@@ -92,6 +95,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}/${{env.ARTIFACT_NAME}}.zip
-        asset_name: ${{env.ARTIFACT_NAME}}.zip
-        asset_content_type: application/zip
+        asset_path: ./ncm2mp3-setup.exe
+        asset_name: ncm2mp3-setup.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
