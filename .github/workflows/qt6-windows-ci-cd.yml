@@ -47,20 +47,20 @@ jobs:
       working-directory: ${{github.workspace}}/build/${{env.BUILD_TYPE}}
       shell: pwsh
       run: |
-        $qtBinPath = Join-Path $env:Qt6_DIR '..' '..' '..' 'bin'
-        $windeployqtPath = Join-Path $qtBinPath 'windeployqt.exe'
+        Write-Output "Qt6_DIR: $env:Qt6_DIR"
+        $qtBinDir = Join-Path $env:Qt6_DIR '..' '..' 'bin'
+        $deployqt6Path = Join-Path $qtBinDir "windeployqt6.exe"
         
-        Write-Output "Checking windeployqt path: $windeployqtPath"
-        
-        if (Test-Path $windeployqtPath) {
-          Write-Output "windeployqt found at: $windeployqtPath"
-          & $windeployqtPath . --release --compiler-runtime
+        if (Test-Path $deployqt6Path) {
+          Write-Output "windeployqt6 found at: $deployqt6Path"
+          & $deployqt6Path . --release --compiler-runtime
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "windeployqt failed with exit code $LASTEXITCODE"
+            Write-Error "windeployqt6 failed with exit code $LASTEXITCODE"
             exit 1
           }
         } else {
-          Write-Error "windeployqt.exe not found at $windeployqtPath"
+          Write-Error "windeployqt6.exe not found at $deployqt6Path"
+          Get-ChildItem $qtBinDir
           exit 1
         }
         
