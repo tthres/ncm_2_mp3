@@ -70,31 +70,46 @@ jobs:
     - name: Install NSIS
       uses: joncloud/makensis-action@v3.7
 
-    - name: Check NSIS script
+    - name: Prepare for NSIS
       shell: pwsh
       run: |
-        $scriptPath = ".\${{ env.NSIS_SCRIPT_NAME }}"
-        if (Test-Path $scriptPath) {
-          Write-Output "NSIS script found at $scriptPath"
-          Get-Content $scriptPath
-        } else {
-          Write-Error "NSIS script not found at $scriptPath"
-          Get-ChildItem -Recurse
-          exit 1
-        }
+        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
+        Copy-Item "${{github.workspace}}/${{ env.NSIS_SCRIPT_NAME }}" -Destination $buildDir
+        Write-Output "Contents of build directory:"
+        Get-ChildItem -Path $buildDir -Recurse
 
     - name: Create Installer
       shell: pwsh
       run: |
-        $buildDir = "${{github.workspace}}/build/Release"
-        Copy-Item "install.nsi" -Destination $buildDir
+        $buildDir = "${{github.workspace}}/build/${{env.BUILD_TYPE}}"
         Set-Location $buildDir
-        & 'C:\Program Files (x86)\NSIS\makensis.exe' /V4 install.nsi
+        Write-Output "Current directory: $buildDir"
+        Write-Output "Current directory contents:"
+        Get-ChildItem -Recurse
+        
+        # 检查 ncm2mp3.exe 是否存在
+        if (Test-Path "ncm2mp3.exe") {
+            Write-Output "ncm2mp3.exe found in current directory"
+        } else {
+            Write-Error "ncm2mp3.exe not found in current directory"
+            exit 1
+        }
+        
+        $nsisPath = "C:\Program Files (x86)\NSIS\makensis.exe"
+        Write-Output "Running NSIS with command: $nsisPath /V3 ${{ env.NSIS_SCRIPT_NAME }}"
+        & $nsisPath /V3 ${{ env.NSIS_SCRIPT_NAME }}
         if ($LASTEXITCODE -ne 0) {
           Write-Error "makensis failed with exit code $LASTEXITCODE"
           exit 1
         }
-        Move-Item ncm2mp3-setup.exe -Destination ${{github.workspace}}
+        
+        if (Test-Path "${{ env.ARTIFACT_NAME }}.exe") {
+          Move-Item "${{ env.ARTIFACT_NAME }}.exe" -Destination ${{github.workspace}}
+          Write-Output "Installer created and moved to workspace"
+        } else {
+          Write-Error "Installer not created"
+          exit 1
+        }
 
     - name: Check Installer
       shell: pwsh
