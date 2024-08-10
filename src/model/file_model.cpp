@@ -23,7 +23,7 @@ QVariant FileModel::data(const QModelIndex &index, int role) const
     }
     if (role == Qt::DisplayRole)
     {
-        return _files.at(index.row()).fileName();
+        // return _files.at(index.row()).fileName();
     }
     else if (role == Qt::UserRole)
     {

@@ -16,6 +16,12 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
     int     totalFiles       = index.model()->rowCount();
 
     QRect progressRect = option.rect.adjusted(4, 4, -4, -4);
+    int   maxWidth     = 200; // 设置最大宽度为200像素
+    if (progressRect.width() > maxWidth)
+    {
+        int diff = progressRect.width() - maxWidth;
+        progressRect.adjust(diff / 2, 0, -diff / 2, 0);
+    }
     progressRect.setHeight(progressRect.height() / 2);
 
     // 绘制进度条
@@ -34,10 +40,6 @@ void ItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, 
         painter->setPen(Qt::black);
         painter->drawText(progressRect, Qt::AlignCenter, QString("%1% (%2/%3)").arg(progress).arg(currentFileIndex).arg(totalFiles));
     }
-
-    // 绘制当前文件名
-    QRect textRect = option.rect.adjusted(4, progressRect.bottom() + 2, -4, -4);
-    painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, currentFile);
 
     painter->restore();
 }
