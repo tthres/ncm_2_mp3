@@ -1,0 +1,78 @@
+name: Qt 6 Windows CI/CD (Widgets & Concurrent)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [ created ]
+
+env:
+  BUILD_TYPE: Release
+  QT_VERSION: 6.7.2
+  ARTIFACT_NAME: YourProjectName-windows
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        dir: '${{ github.workspace }}/Qt/'
+        install-deps: 'true'
+        modules: 'qtwidgets qtconcurrent'
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build -A x64 -DQt6_DIR="${{ env.Qt6_DIR }}" -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Package
+      working-directory: ${{github.workspace}}/build/${{env.BUILD_TYPE}}
+      run: |
+        ${{ env.Qt6_DIR }}/../../../bin/windeployqt.exe . --release --compiler-runtime
+        7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.ARTIFACT_NAME}}
+        path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}/${{env.ARTIFACT_NAME}}.zip
+
+  release:
+    name: Create Release
+    needs: build
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{env.ARTIFACT_NAME}}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./${{env.ARTIFACT_NAME}}.zip
+        asset_name: ${{env.ARTIFACT_NAME}}.zip
+        asset_content_type: application/zip
