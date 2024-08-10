@@ -48,21 +48,25 @@ jobs:
       shell: pwsh
       run: |
         Write-Output "Qt6_DIR: $env:Qt6_DIR"
-        $qtBinDir = Join-Path $env:Qt6_DIR '..' '..' 'bin'
-        $deployqt6Path = Join-Path $qtBinDir "windeployqt6.exe"
         
-        if (Test-Path $deployqt6Path) {
-          Write-Output "windeployqt6 found at: $deployqt6Path"
-          & $deployqt6Path . --release --compiler-runtime
+        # 查找 windeployqt.exe
+        $windeployqtPath = Get-ChildItem -Path $env:Qt6_DIR -Recurse -Filter "windeployqt.exe" | Select-Object -First 1 -ExpandProperty FullName
+        
+        if ($windeployqtPath) {
+          Write-Output "windeployqt found at: $windeployqtPath"
+          & $windeployqtPath . --release --compiler-runtime
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "windeployqt6 failed with exit code $LASTEXITCODE"
+            Write-Error "windeployqt failed with exit code $LASTEXITCODE"
             exit 1
           }
         } else {
-          Write-Error "windeployqt6.exe not found at $deployqt6Path"
-          Get-ChildItem $qtBinDir
+          Write-Error "windeployqt.exe not found in Qt directory"
+          Get-ChildItem -Path $env:Qt6_DIR -Recurse | Where-Object { $_.Name -like "*deploy*" } | ForEach-Object { Write-Output $_.FullName }
           exit 1
         }
+        
+        Write-Output "Listing current directory contents:"
+        Get-ChildItem -Recurse
         
         7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
 
