@@ -1,4 +1,4 @@
-name: Qt 6 Windows CI/CD (Widgets & Concurrent)
+name: Qt 6 Windows CI/CD (Path Fix)
 
 on:
   push:
@@ -38,15 +38,32 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build -A x64 -DQt6_DIR="${{ env.Qt6_DIR }}" -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake -B ${{github.workspace}}/build -A x64 -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Package
       working-directory: ${{github.workspace}}/build/${{env.BUILD_TYPE}}
+      shell: pwsh
       run: |
-        ${{ env.Qt6_DIR }}/../../../bin/windeployqt.exe . --release --compiler-runtime
+        $qtBinPath = Join-Path $env:Qt6_DIR '..' '..' '..' 'bin'
+        $windeployqtPath = Join-Path $qtBinPath 'windeployqt.exe'
+        
+        Write-Output "Checking windeployqt path: $windeployqtPath"
+        
+        if (Test-Path $windeployqtPath) {
+          Write-Output "windeployqt found at: $windeployqtPath"
+          & $windeployqtPath . --release --compiler-runtime
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "windeployqt failed with exit code $LASTEXITCODE"
+            exit 1
+          }
+        } else {
+          Write-Error "windeployqt.exe not found at $windeployqtPath"
+          exit 1
+        }
+        
         7z a -tzip ${{env.ARTIFACT_NAME}}.zip *
 
     - name: Upload Artifact
