@@ -1,4 +1,4 @@
-name: Qt 6 Windows CI/CD (Path Fix)
+name: Qt 6 Windows CI/CD (Optimized)
 
 on:
   push:
@@ -69,23 +69,6 @@ jobs:
 
     - name: Install NSIS
       uses: joncloud/makensis-action@v3.7
-
-    - name: Debug - List Files
-      shell: pwsh
-      run: |
-        Write-Output "Listing files in the current directory:"
-        Get-ChildItem -Recurse | Select-Object FullName
-
-    - name: Rename NSIS Script
-      shell: pwsh
-      run: |
-        if (Test-Path ".\installer.nsi") {
-          Rename-Item -Path ".\installer.nsi" -NewName ${{ env.NSIS_SCRIPT_NAME }}
-          Write-Output "Renamed installer.nsi to ${{ env.NSIS_SCRIPT_NAME }}"
-        } else {
-          Write-Error "installer.nsi not found"
-          exit 1
-        }
 
     - name: Check NSIS script
       shell: pwsh
