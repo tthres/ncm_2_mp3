@@ -1,7 +1,15 @@
 #include "widget.h"
 #include "ui_widget.h"
+#include "delegate/item_delegate.h"
 
-Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget), folderName(""), _list({}), _progressDialog(nullptr)
+Widget::Widget(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::Widget)
+    , folderName("")
+    , _list({})
+    , _progressDialog(nullptr)
+    , _fileModel(new FileModel(this))
+    , _converter(new Converter(this))
 {
     ui->setupUi(this);
 
@@ -9,6 +17,14 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget), folderNam
     this->setMinimumSize(509, 253);
 
     this->setWindowTitle("NCM_2_MP3");
+
+    // set up the view
+    ui->listView->setModel(_fileModel);
+    ui->listView->setItemDelegate(new ItemDelegate(this));
+
+    // connect the signals and slots
+    connect(_converter, &Converter::ConversionProgress, this, &Widget::UpdateConversionProgress);
+    connect(_converter, &Converter::ConversionFinished, this, &Widget::OnConversionFinished);
 }
 
 Widget::~Widget()
@@ -56,73 +72,21 @@ void Widget::on_openButton_clicked()
     if (!folderPath.isEmpty())
     {
         ui->mainLineEdit->setText(folderPath);
-        folderName = folderPath;
-        qInfo() << "打开文件 ： " << folderName;
+        _fileModel->SetFolder(folderPath);
     }
 }
 
 void Widget::on_startButton_clicked()
 {
-    if (folderName.isEmpty())
+    if (_fileModel->rowCount() == 0)
     {
-        qInfo() << "文件打开失败";
+        qInfo() << "No files to convert";
         return;
     }
-    // 解析文件
-    qInfo() << "开始解析文件" << folderName;
-    _list = getNcmFiles(folderName);
 
-    int count = 0;
-    for (auto it = _list.begin(); it != _list.end(); it++)
-    {
-        count++;
-    }
-    qInfo() << "共找到NCM文件[" << count << "]个";
+    qInfo() << "find ncm " << _fileModel->rowCount() << " files";
 
-    if (_progressDialog)
-    {
-        delete _progressDialog;
-    }
-    _progressDialog = new QProgressDialog("Converting files...", "Cancel", 0, count, this);
-    _progressDialog->setWindowModality(Qt::WindowModal);
-    _progressDialog->setMinimumDuration(0); // 立即显示，不使用延迟
-    _progressDialog->setValue(0);
-
-    int currentFile = 0;
-
-    // 开始转换
-    for (auto it = _list.begin(); it != _list.end(); it++)
-    {
-        if (_progressDialog->wasCanceled())
-        {
-            break;
-        }
-
-        QString qstr = *it;
-        qInfo() << "transform" << *it << "....";
-        QByteArray  byteArray = it->toLocal8Bit();
-        const char *cstr      = byteArray.constData();
-        qInfo().noquote() << "transform" << it->toUtf8().constData() << "....";
-
-        std::string str(cstr);
-
-        int ret = readFileData(cstr);
-        if (ret != 0)
-        {
-            qInfo() << "error?? ret = " << ret;
-        }
-        else
-        {
-            qInfo() << "transform" << cstr << "succeed !!";
-        }
-
-        currentFile++;
-        _progressDialog->setValue(currentFile);
-        _progressDialog->setLabelText(QString("Converting: %1").arg(QFileInfo(*it).fileName()));
-        QApplication::processEvents(); // 允许 GUI 更新
-    }
-
-    _progressDialog->hide();
+    _converter->StartConversion(_fileModel->GetFileList());
 }
 
 void Widget::on_cancelButton_clicked()
@@ -139,4 +103,26 @@ void Widget::on_stoplButton_clicked()
     {
         return;
     }
+}
+
+void Widget::UpdateConversionProgress(int progress, const QString &currentFile)
+{
+    // if (_progressDialog->wasCanceled())
+    // {
+    //     _converter->CancelConversion();
+    //     return;
+    // }
+
+    // _progressDialog->setValue(progress);
+    // _progressDialog->setLabelText(QString("Converting: %1").arg(currentFile));
+    _fileModel->SetTotalProgress(progress, currentFile);
+}
+
+void Widget::OnConversionFinished()
+{
+    // _progressDialog->close();
+    // delete _progressDialog;
+    // _progressDialog = nullptr;
+
+    _fileModel->RefreshModel();
 }

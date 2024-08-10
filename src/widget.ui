@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>509</width>
-    <height>253</height>
+    <width>517</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,7 @@
     </font>
    </property>
    <property name="focusPolicy">
-    <enum>Qt::NoFocus</enum>
+    <enum>Qt::FocusPolicy::NoFocus</enum>
    </property>
    <property name="text">
     <string> NCM转换大师</string>
@@ -104,6 +104,16 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QListView" name="listView">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>130</y>
+     <width>311</width>
+     <height>41</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>

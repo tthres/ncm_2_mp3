@@ -9,7 +9,9 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QProgressDialog>
-#include "model.h"
+#include <QListView>
+#include "model/file_model.h"
+#include "converter/converter.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -35,6 +37,9 @@ private slots:
 
     void on_stoplButton_clicked();
 
+    void UpdateConversionProgress(int progress, const QString &currentFile);
+    void OnConversionFinished();
+
 private:
     std::list<QString> getNcmFiles(const QString &foldername);
 
@@ -42,5 +47,8 @@ private:
     QString            folderName;
     std::list<QString> _list;
     QProgressDialog   *_progressDialog;
+
+    FileModel *_fileModel;
+    Converter *_converter;
 };
 #endif // WIDGET_H

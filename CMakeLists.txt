@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 
 # Find the Qt package
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent )
 
 # Third-party libraries
 add_library(cjson STATIC
@@ -27,24 +27,38 @@ add_library(aes STATIC
 )
 target_include_directories(aes PUBLIC third_party/aes)
 
+set(UI_FILES
+    src/widget.ui
+)
+
+qt_wrap_ui(UI_HEADERS ${UI_FILES})
+
 # Main executable
 set(PROJECT_SOURCES
     src/main.cpp
     src/widget.cpp
     src/widget.h
     src/widget.ui
-    src/model.c
-    src/model.h
+    src/converter/model.c
+    src/converter/model.h
+    src/converter/converter.cpp
+    src/converter/converter.h
+    src/delegate/item_delegate.cpp
+    src/delegate/item_delegate.h
+    src/model/file_model.cpp
+    src/model/file_model.h
 )
 
 
 qt_add_executable(ncm2mp3
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    ${UI_HEADERS}
 )
 
 target_link_libraries(ncm2mp3 PRIVATE 
     Qt6::Widgets
+    Qt6::Concurrent
     cjson
     aes
 )
@@ -53,6 +67,7 @@ target_link_libraries(ncm2mp3 PRIVATE
 target_include_directories(ncm2mp3 PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party
+    ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 # Finalize the executable (for Qt6)
