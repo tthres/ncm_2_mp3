@@ -69,9 +69,45 @@ jobs:
     - name: Install NSIS
       uses: joncloud/makensis-action@v3.7
 
-    - name: Create Installer
+    - name: Check NSIS script
+      shell: pwsh
       run: |
-        makensis.exe installer.nsi
+        $scriptPath = ".\installer.nsi"
+        if (Test-Path $scriptPath) {
+          Write-Output "NSIS script found at $scriptPath"
+          Get-Content $scriptPath
+        } else {
+          Write-Error "NSIS script not found at $scriptPath"
+          Get-ChildItem -Recurse
+          exit 1
+        }
+
+    - name: Create Installer
+      shell: pwsh
+      run: |
+        $scriptPath = ".\installer.nsi"
+        if (Test-Path $scriptPath) {
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' /V4 $scriptPath
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "makensis failed with exit code $LASTEXITCODE"
+            exit 1
+          }
+        } else {
+          Write-Error "NSIS script not found at $scriptPath"
+          exit 1
+        }
+
+    - name: Check Installer
+      shell: pwsh
+      run: |
+        $installerPath = ".\ncm2mp3-setup.exe"
+        if (Test-Path $installerPath) {
+          Write-Output "Installer created successfully at $installerPath"
+        } else {
+          Write-Error "Installer not found at $installerPath"
+          Get-ChildItem -Recurse
+          exit 1
+        }
 
     - name: Generate release tag
       id: tag
